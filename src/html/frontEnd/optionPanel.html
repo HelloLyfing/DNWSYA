@@ -1,0 +1,71 @@
+<div id="DNWSYA-OptsPanel">
+  <div class="btn btn-default" id="shieldUser">
+    <span class="glyphicon glyphicon-trash"></span> 屏蔽用户
+  </div>
+
+  <button type="button" class="btn btn-default">
+    <span class="glyphicon glyphicon-trash"></span> 屏蔽网址
+  </button>
+
+  <button type="button" class="btn btn-default">
+    <span class="glyphicon glyphicon-align-left"></span> 屏蔽More
+  </button>
+  
+  <div id="demo" class="collapse in">
+  </div>
+</div>
+
+<script type="text/javascript">
+var initElemsOnDrag = ( function(){
+  
+  var slt = {
+    userSlt     : 'td.subtext > a[href^="user?id="]',
+    userTrashSlt: '#shieldUser'
+  }
+  
+  function user(){
+    $(slt.userSlt).on('dragstart', function(e){
+      var userID = $(this).html();
+      $(slt.userTrashSlt).data('userID', userID);
+    });
+  }
+
+  return {
+    user: user
+  }
+})();
+
+var sendNewItemToChrome = function(type, value){
+  var msg = {
+    type  : 'DNWSYA:Request:GetNewShieldItem:TabPage',
+    evData: {type: type, value: value}
+  };
+  chrome.runtime.sendMessage(msg, function(resp){
+    console.log('chrome resp');
+    console.log(resp);
+    FilterContent(resp.evData.list);
+  });
+};
+
+$( function() {
+  initElemsOnDrag.user();
+  var $sU = $('#shieldUser');
+  $sU.on('dragover', function(e){
+    e.preventDefault();
+    var $this = $(this);
+    $this.addClass('onDragOver');
+  }).on('dragleave', function(e){
+    var $this = $(this);
+    clearTimeout( $this.data('timeoutID') );
+    var tmpID = setTimeout( function(){
+      $this.removeClass('onDragOver');
+    }, 200);
+    $this.data('timeoutID', tmpID);
+  }).on('drop', function(e){
+    e.preventDefault();
+    var userID = $(this).data('userID');
+    $(this).trigger('dragleave');
+    sendNewItemToChrome('user', userID);
+  });
+});
+</script>

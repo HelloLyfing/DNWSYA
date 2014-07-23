@@ -1,0 +1,55 @@
+{
+    "manifest_version" : 2,
+    "minimum_chrome_version": "22",
+    
+    "name"       : "清爽一下(StartupNews)",
+    "description": "",
+    
+    "version": "1.0.0",
+    
+    "browser_action": {
+        "default_icon": "/image/cocktail-128x128.png"
+    },
+    
+    "icons": {
+        "128": "/image/cocktail-128x128.png",
+        "48" : "/image/cocktail-48x48.png",
+        "16" : "/image/cocktail-16x16.png"
+    },
+    
+    "permissions": [ 
+        "storage",
+        "tabs",
+        "http://news.dbanotes.net/"
+    ],
+
+    "web_accessible_resources" : [
+        "/html/*",
+        "/fonts/*"
+    ],
+    
+    "content_security_policy" : "script-src 'self'; object-src 'self'",
+    
+    "options_page": "/html/backEnd/optionPage.html",
+    
+    "background" : {
+        "page"       : "/html/backEnd/backGround.html",
+        "persistent" : false
+    },
+    
+    "content_scripts" : [{
+        "run_at" : "document_start",
+        "matches": [ "http://news.dbanotes.net/*" ],
+        "css"    : [
+            "/css/3rdParty/bootstrap-min-v3.2.0.css",
+            "/css/frontEnd/common.css"
+        ],
+        "js"     : [
+            "/js/public/config.js",
+            "/js/3rdParty/jquery-min-v2.1.1.js",
+            "/js/3rdParty/jquery-easing-v1.3.js",
+            "/js/3rdParty/bootstrap-min-v3.2.0.js",
+            "/js/frontEnd/test.js"
+        ]
+    }]
+}

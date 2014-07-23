@@ -1,0 +1,24 @@
+html {
+  overflow-y: scroll;
+}
+
+#DNWSYA-OptsPanel {
+  position: fixed;
+  top: 5px;
+  right: -185px;
+  width: 185px;
+  height: auto;
+  z-index: 100;
+  opacity: 0.93;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+  box-sizing: content-box;
+}
+
+.onDragOver {
+  border: 2px dashed #000;
+  background-color: #F55;
+  height: 100px;
+}
