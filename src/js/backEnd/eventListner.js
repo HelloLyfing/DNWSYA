@@ -7,7 +7,7 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
   switch(request.type) {
     case 'DNWSYA:Request:InitData:TabPage':
       chrome.storage.sync.get( function(items){
-        var shieldList = items['ShieldList'] || {};
+        var shieldList = items[ShieldList.key] || {};
         var resp = {
           ExtID     : chrome.runtime.id,
           shieldList: shieldList
@@ -15,21 +15,27 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
         sendResponse(resp);
       });
     break;
+    case 'DNWSYA:Request:NewTab:TabPage':
+      chrome.tabs.create({url: evData.url, index: (activeTab.index + 1)});
+    break;
     case 'DNWSYA:Request:GetNewShieldItem:TabPage':
       chrome.storage.sync.get( function(items){
-        var list = items['ShieldList'] || {};
+        var tmpList = items[ShieldList.key] || {};
         switch(evData.type){
-          case 'user':
-            if ( !Array.isArray(list.users) ) list.users = [];
-            if ( list.users.indexOf(evData.value) === -1 ) {
-              list.users.push(evData.value);
+          case ShieldList.elemList[0]:
+            var userList = tmpList[ ShieldList.elemList[0] ];
+            if ( !Array.isArray(userList) ) userList = [];
+            if ( userList.indexOf(evData.value) === -1 ) {
+              userList.push(evData.value);
             }
+            tmpList[ ShieldList.elemList[0] ] = userList;
           break;
         }
-        chrome.storage.sync.set({'ShieldList': list});
+        var setObj = {}; setObj[ShieldList.key] = tmpList;
+        chrome.storage.sync.set(setObj);
         var resp = {
           result: true,
-          evData: {list: list}
+          evData: {list: tmpList}
         };
         sendResponse(resp);
       });

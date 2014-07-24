@@ -1,48 +1,83 @@
 var PageParams = {
-  ExtID: null
+  ExtID  : null,
+  ExtHost: null
 };
 
 $( function() {
-  var $aLast = $('.pagetop').children('a[href="http://news.dbanotes.net/submit"]');
-  var $newA = $aLast.clone();
-  $newA.attr({ id: 'DNWSYA-Btn', href: 'javascript:;', style: 'color: #ff6600' });
-  $newA.html(ExtNickName);
-  $aLast.after('&nbsp;|&nbsp;', $newA);
-
-  $('#DNWSYA-Btn').on('click', function(){
-    var $optsPanel = $('#DNWSYA-OptsPanel');
-    var status = $optsPanel.data('isFlipIn');
-    if ( !!status ) { // 已经飞入，即将退入后台
-      $optsPanel.animate({right: '-=185'});
-    } else {          // 后台中，即将飞入
-      $optsPanel.animate({right: '+=185'}, {duration: 500, easing: 'easeOutBounce'});
-    }
-    $optsPanel.data('isFlipIn', !status);
-  });
-  
-  $(document).on('dblclick', function(){
-    $('#DNWSYA-Btn').trigger('click');
-  });
-
+  DomHelper.initMainBtn();
+  // request init data from Ext-backEnd
   chrome.runtime.sendMessage({type: 'DNWSYA:Request:InitData:TabPage'}, function(response) {
     PageParams.ExtID = response.ExtID;
     PageParams.ExtHost = 'chrome-extension://' + PageParams.ExtID;
-    insertDom();
+    DomHelper.insertExtDom();
     FilterContent(response.shieldList);
   });
 });
 
-function insertDom() {
-  $('body').append('<div id="DNWSYA-Container"></div>');
-  var host = PageParams.ExtHost;
+var DomHelper = ( function(){
+  
+  var slt = {
+    extDom   : '#DNWSYA-Container',
+    mainBtn  : '#DNWSYA-Btn',
+    optsPanel: '#DNWSYA-OptsPanel'
+  };
 
-  var resList = [
-    host + '/html/frontEnd/optionPanel.html' // 选项面板
-  ];
-  for(var x = 0; x < resList.length; x++){
-    $('#DNWSYA-Container').load(resList[x]);
+  function insertExtDom() {
+    $('body').append('<div id="' + slt.extDom.replace('#', '') + '"></div>');
+    
+    var ExtHost = PageParams.ExtHost;
+    var resList = [
+      ExtHost + '/html/frontEnd/trashPanel.html' // 选项面板
+    ];
+    for(var x = 0; x < resList.length; x++){
+      $(slt.extDom).load(resList[x]);
+    }
   }
-}
+
+  function mainBtnInsert(){
+    var $aLast = $('.pagetop').children('a[href="http://news.dbanotes.net/submit"]');
+    var $newA = $aLast.clone();
+    $newA.attr({ 
+      id   : slt.mainBtn.replace('#', ''), 
+      href : 'javascript:;', 
+      style: 'color: #ff6600' 
+    });
+    $newA.html(ExtNickName);
+    $aLast.after('&nbsp;|&nbsp;', $newA);
+  }
+
+  function mainBtnAttachHandler() {
+    $(slt.mainBtn).on('click', function(){
+      // viewPort width
+      var vpWidth = document.documentElement.clientWidth;
+      // body width
+      var bodyWdith = document.body.children[0].clientWidth;
+      // flipIn distance
+      var flipDist = (vpWidth - bodyWdith) / 2 - 5;
+      
+      var status = $(slt.optsPanel).data('isFlipIn');
+      if ( !!status ) { // 已经飞入，即将退入后台
+        $(slt.optsPanel).animate({right: '-=' + flipDist});
+      } else {          // 后台中，即将飞入
+        $(slt.optsPanel).animate({right: '+=' + flipDist}, {duration: 500, easing: 'easeOutBounce'});
+      }
+      $(slt.optsPanel).data('isFlipIn', !status);
+    });
+
+    $(document).on('dblclick', function(){
+      $(slt.mainBtn).trigger('click');
+    });
+  }
+
+  return {
+    initMainBtn: function(){
+      mainBtnInsert();
+      mainBtnAttachHandler();
+    },
+
+    insertExtDom: insertExtDom
+  }
+})();
 
 var FilterContent = ( function(){
   
@@ -60,7 +95,7 @@ var FilterContent = ( function(){
       hide: 'glyphicon glyphicon-eye-close'
     }
     var $moreBtn = $('.title > a[href^="/x?fnid="]');
-    $moreBtn.after('&nbsp;', '<a href="#" id="DNWSYA-trashBtn"></a>');
+    $moreBtn.after('<a href="javascript:;" id="DNWSYA-trashBtn"></a>');
     var $trashBtn = $('#DNWSYA-trashBtn');
     $trashBtn.css({'color': '#828282', 'margin-left': '600px'});
     $trashBtn.html('<span></span>');

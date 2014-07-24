@@ -49,7 +49,7 @@
             "/js/3rdParty/jquery-min-v2.1.1.js",
             "/js/3rdParty/jquery-easing-v1.3.js",
             "/js/3rdParty/bootstrap-min-v3.2.0.js",
-            "/js/frontEnd/test.js"
+            "/js/frontEnd/contentScriptInit.js"
         ]
     }]
 }

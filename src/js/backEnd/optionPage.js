@@ -6,22 +6,25 @@ $( function(){
   
   $('body').on('click', 'a[name=delUserIcon]', function(){
     var userID = $(this).parent().data('userID');
-    console.log(userID);
-    rmItemFromList('users', userID);
+    rmItemFromList(ShieldList.elemList[0], userID);
+    $(this).parents('[name=userItem-Normal]').fadeOut(400, function(){
+      $(this).remove();
+    });
   });
 });
 
 function rmItemFromList(type, value) {
   chrome.storage.sync.get( function(items){
-    var shieldList = items['ShieldList'] || {};
-    var tmpList = shieldList[type];
-    var idx = tmpList.indexOf(value);
+    var shieldList = items[ShieldList.key] || {};
+    var typeList = shieldList[type];
+    var idx = typeList.indexOf(value);
     
     if ( idx === - 1 ) return;
     
-    tmpList.splice(idx, 1);
-    shieldList[type] = tmpList;
-    chrome.storage.sync.set({'ShieldList': shieldList});
+    typeList.splice(idx, 1);
+    shieldList[type] = typeList;
+    var setObj = {}; setObj[ShieldList.key] = shieldList;
+    chrome.storage.sync.set(setObj);
   });
 }
 
