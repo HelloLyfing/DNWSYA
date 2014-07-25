@@ -5,7 +5,7 @@
     "name"       : "清爽一下(StartupNews)",
     "description": "",
     
-    "version": "1.0.0",
+    "version": "0.0.0.1",
     
     "browser_action": {
         "default_icon": "/image/cocktail-128x128.png"
