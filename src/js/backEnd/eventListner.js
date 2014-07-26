@@ -20,27 +20,26 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
     break;
     case 'DNWSYA:Request:GetNewShieldItem:TabPage':
       chrome.storage.sync.get( function(items){
-        var tmpList = items[ShieldList.key] || {};
-        switch(evData.type){
-          case ShieldList.elemList[0]:
-            var userList = tmpList[ ShieldList.elemList[0] ];
-            if ( !Array.isArray(userList) ) userList = [];
-            if ( userList.indexOf(evData.value) === -1 ) {
-              userList.push(evData.value);
-            }
-            tmpList[ ShieldList.elemList[0] ] = userList;
-          break;
+        var shieldList = items[ShieldList.key] || {};
+        
+        var typeList = shieldList[ evData.type ];
+        if ( !Array.isArray(typeList) ) typeList = [];
+        // 只有未添加过的才会被添加
+        if ( typeList.indexOf(evData.value) === -1 ) {
+          typeList.push(evData.value);
         }
-        var setObj = {}; setObj[ShieldList.key] = tmpList;
+        shieldList[ evData.type ] = typeList;
+
+        var setObj = {}; setObj[ShieldList.key] = shieldList;
         chrome.storage.sync.set(setObj);
         var resp = {
           result: true,
-          evData: {list: tmpList}
+          evData: {shieldList: shieldList}
         };
         sendResponse(resp);
       });
     break;
   } // end switch
-  // 有异步调用sendResponse，所以此处返回true，详见：https://developer.chrome.com/extensions/runtime#event-onMessage
+  // 有异步调用sendResponse，所以此处返回true，详见：http://bit.ly/1kfXLWR
   return true;
 });

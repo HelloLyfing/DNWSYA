@@ -1,9 +1,9 @@
 <div id="DNWSYA-OptsPanel">
-  <div class="btn btn-default" id="shieldAreaUser" style="width: 101px;">
+  <div class="btn btn-default shieldArea" id="shieldAreaUser" style="width: 101px;">
     <span class="glyphicon glyphicon-trash"></span> 屏蔽用户
   </div>
 
-  <div type="button" class="btn btn-default" style="width: 101px; margin-top: 5px;">
+  <div type="button" class="btn btn-default shieldArea" id="shieldAreaWebsite" style="width: 101px; margin-top: 5px;">
     <span class="glyphicon glyphicon-trash"></span> 屏蔽网址
   </div>
 
@@ -14,22 +14,73 @@
 </div>
 
 <script type="text/javascript">
-var initElemsOnDrag = ( function(){
-  
-  var slt = {
-    userLink     : 'td.subtext > a[href^="user?id="]',
-    trashAreaUser: '#shieldAreaUser'
-  }
-  
-  function user(){
-    $(slt.userLink).on('dragstart', function(e){
-      var userID = $(this).html();
-      $(slt.trashAreaUser).data('userID', userID);
-    });
-  }
+var TrashPanel = ( function(){
+
+  var elemsAttachHandler = function(){
+    
+    var slt = {
+      shieldAreaUser   : '#shieldAreaUser',
+      shieldAreaWebsite: '#shieldAreaWebsite'
+    };
+
+    function trashAreaHandler() {
+      $('.shieldArea').on('dragover', function(e){
+        e.preventDefault();
+        $(this).addClass('onDragOver');
+      }).on('dragleave', function(e){
+        var $this = $(this);
+        clearTimeout( $this.data('timeoutID') );
+        var tmpID = setTimeout( function(){
+          $this.removeClass('onDragOver');
+        }, 260);
+        $this.data('timeoutID', tmpID);
+      });
+
+      $('#shieldAreaMore').on('click', function(){
+        // 打开后台选项页
+        var url = PageParams.ExtHost + '/html/backEnd/optionPage.html';
+        var msg = {
+          type: 'DNWSYA:Request:NewTab:TabPage',
+          evData: {url: url}
+        };
+        chrome.runtime.sendMessage(msg);
+      });  
+    }
+    
+    function userLinkDnDHandler(){
+      $(DNWSYASlt.userLink).on('dragstart', function(e){
+        var userID = $(this).html();
+        $(slt.shieldAreaUser).data('userID', userID);
+      });
+      $(slt.shieldAreaUser).on('drop', function(e){
+        e.preventDefault();
+        var userID = $(this).data('userID');
+        $(this).trigger('dragleave');
+        sendNewItemToChrome(ShieldList.elemList[0], userID);
+      });
+    }
+
+    function tweetLinkDnDHandler() {
+      $(DNWSYASlt.tweetLink).on('dragstart', function(e){
+        $(slt.shieldAreaWebsite).data('host', this.host);
+      });
+      $(slt.shieldAreaWebsite).on('drop', function(e){
+        e.preventDefault();
+        var host = $(this).data('host');
+        $(this).trigger('dragleave');
+        sendNewItemToChrome(ShieldList.elemList[1], host);
+      });
+    }
+
+    return function(){
+      trashAreaHandler();
+      userLinkDnDHandler();
+      tweetLinkDnDHandler();
+    }
+  }(); // end of elemsAttachHandler()
 
   return {
-    user: user
+    elemsAttachHandler: elemsAttachHandler
   }
 })();
 
@@ -39,38 +90,11 @@ var sendNewItemToChrome = function(type, value){
     evData: {type: type, value: value}
   };
   chrome.runtime.sendMessage(msg, function(resp){
-    FilterContent(resp.evData.list);
+    FilterContent(resp.evData.shieldList);
   });
 };
 
 $( function() {
-  initElemsOnDrag.user();
-
-  $('#shieldAreaUser').on('dragover', function(e){
-    e.preventDefault();
-    $(this).addClass('onDragOver');
-  }).on('dragleave', function(e){
-    var $this = $(this);
-    clearTimeout( $this.data('timeoutID') );
-    var tmpID = setTimeout( function(){
-      $this.removeClass('onDragOver');
-    }, 260);
-    $this.data('timeoutID', tmpID);
-  }).on('drop', function(e){
-    e.preventDefault();
-    var userID = $(this).data('userID');
-    $(this).trigger('dragleave');
-    sendNewItemToChrome(ShieldList.elemList[0], userID);
-  });
-
-  $('#shieldAreaMore').on('click', function(){
-    // 打开后台选项页
-    var url = PageParams.ExtHost + '/html/backEnd/optionPage.html';
-    var msg = {
-      type: 'DNWSYA:Request:NewTab:TabPage',
-      evData: {url: url}
-    };
-    chrome.runtime.sendMessage(msg);
-  });
+  TrashPanel.elemsAttachHandler();
 });
 </script>
