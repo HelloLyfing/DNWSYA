@@ -2,10 +2,10 @@
     "manifest_version" : 2,
     "minimum_chrome_version": "22",
     
-    "name"       : "清爽一下(StartupNews)",
+    "name"       : "清爽一下(for StartupNews)",
     "description": "",
     
-    "version": "0.0.0.2",
+    "version": "0.0.3",
     
     "browser_action": {
         "default_icon": "/image/cocktail-128x128.png"
