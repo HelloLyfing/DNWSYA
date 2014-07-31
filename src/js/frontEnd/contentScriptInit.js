@@ -132,42 +132,45 @@ var FilterContent = ( function(){
       var $rowClone = $('#DNWSYA-Container tr[name=DNWSYA-oneTrashTR-Model').clone();
       $(DNWSYASlt.moreBtn).parents('tr:first').after($rowClone);
     }
-    
+    // 将已存在的itemID暂存到 model 的数据区，便于对比
     var $trashRowModel = $(DNWSYASlt.oneTrashRow);
     var trashIndex = $trashRowModel.data('trashIndex') || 1;
     var trashIDList = $trashRowModel.data('trashIDList') || [].slice(0);
     // 已存在的就不再添加，并返回
     if ( trashIDList.indexOf(item.id) > -1 ) {
       return;
-    } else {
-      trashIDList.push(item.id);
-      $trashRowModel.data('trashIDList', trashIDList);
-      $trashRowModel.data('trashIndex', trashIndex + 1);
     }
+
+    trashIDList.push(item.id);
+    $trashRowModel.data('trashIDList', trashIDList);
+    $trashRowModel.data('trashIndex', trashIndex + 1);
 
     var $newTrashRow = $trashRowModel.clone();
     $newTrashRow.attr({name: 'DNWSYA-oneTrashTR-Normal'});
     $newTrashRow.find('[name=index]').html(trashIndex);
     $newTrashRow.find('a[name=title]').attr('href', item.link).html(item.title).after('&nbsp;');
+    
+    var strWhyShield = '@<b>' + whyShield.name + '</b>: ' + whyShield.value;
     switch(whyShield.type){
     case WhyShieldType[0]:
       var $userLink = $newTrashRow.find('a[name=author]');
       $userLink.attr('href', '/user?id=' + item.author);
-      $userLink.html('@用户: '+ whyShield.value);
+      $userLink.html(strWhyShield);
     break;
     case WhyShieldType[1]:
       var $strWhy = $newTrashRow.find('span[name=stringWhy]');
-      $strWhy.html('@网站: ' + whyShield.value);
+      $strWhy.html(strWhyShield);
     break;
     case WhyShieldType[2]:
       var $strWhy = $newTrashRow.find('span[name=stringWhy]');
-      $strWhy.html('@网址: ' + whyShield.value);
+      $strWhy.html(strWhyShield);
     break;
     case WhyShieldType[3]:
       var $strWhy = $newTrashRow.find('span[name=stringWhy]');
-      $strWhy.html('@标题: ' + whyShield.value);
+      $strWhy.html(strWhyShield);
     break;
     }
+    
     $trashRowModel.before('<tr style="height: 6px; display: none;"></tr>');
     $trashRowModel.before($newTrashRow);
   }
@@ -201,7 +204,7 @@ var FilterContent = ( function(){
     }
 
     function find($tweetRow){
-      var userID = $tweetRow.find(userLinkSlt).html();
+      var userID = $tweetRow.next().find(userLinkSlt).html();
       if (userList.indexOf(userID) > -1) {
         tmpData.userID = userID;
         tmpData.tweetRow = $tweetRow;
@@ -259,8 +262,10 @@ var FilterContent = ( function(){
   })();
 
   return function(list){
-    checkTrashByUser.init( list[ShieldList.elemList[0]] );
-    checkTrashByHost.init( list[ShieldList.elemList[1]] );
+    var shieldUsers = list[ShieldList.elemList[0]] || [].slice(0);
+    var shieldHosts = list[ShieldList.elemList[1]] || [].slice(0);
+    checkTrashByUser.init( shieldUsers );
+    checkTrashByHost.init( shieldHosts );
 
     var foundList = [].slice(0);
     // 首先获取所有条目（32条，标题所在栏TR）

@@ -4,7 +4,7 @@ var ExtEngName = 'DNWSYA';
 
 var ShieldList = {
   key     : 'ShieldList',
-  elemList: ['users', 'hosts', 'addresses', 'titles']
+  elemList: ['users', 'hosts', 'addres', 'titles']
 };
 
 var DNWSYASlt = {

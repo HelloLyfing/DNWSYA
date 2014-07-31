@@ -1,7 +1,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>再也不要看到你 - 设置</title>
+  <title>设置 - 再也不要看到你</title>
   
   <link rel="stylesheet" type="text/css" href="/css/3rdParty/bootstrap-min-v3.2.0.css">
   <link rel="stylesheet" type="text/css" href="/css/backEnd/backEndGlobal.css">
@@ -12,13 +12,47 @@
 
 <body>
   <div class="container">
-  <div class="row">
-    <div class="col-md-2" name="userItem-Model" style="display: none; font-size: 23px; height: 35px">
-      <label class="btn">
-        <a name="delUserIcon" href="#"><i class="DNWSYA-btn-icon glyphicon glyphicon-remove"></i></a>
-      </label>
+    <hr>
+    <div class="shieldType">用户</div>
+    <div class="row">
+      <div class="col-md-2" name="userItem-Model" style="display: none; font-size: 22px;">
+        <button class="btn trashItem" data-value="" data-shield_type="users">
+          <span></span>
+          <a name="delUserIcon" href="#" style="display: none;"><i class="DNWSYA-btn-icon glyphicon glyphicon-remove"></i></a>
+        </button>
+      </div>
     </div>
-  </div>
+
+    <hr>
+    <div class="shieldType">网站</div>
+    <div class="row">
+      <div class="col-md-3" name="hostItem-Model" style="display: none; font-size: 23px; height: 35px">
+        <label class="btn trashItem" data-value="" data-shield_type="hosts">
+          <a name="delUserIcon" href="#" style="display: none;"><i class="DNWSYA-btn-icon glyphicon glyphicon-remove"></i></a>
+        </label>
+      </div>
+    </div>
+
+    <hr>
+    <div class="shieldType">网址</div>
+    <div class="row">
+      <div class="col-md-3" name="addrItem-Model" style="display: none; font-size: 23px; height: 35px">
+        <label class="btn trashItem" data-value="" data-shield_type="addres">
+          <a name="delUserIcon" href="#" style="display: none;"><i class="DNWSYA-btn-icon glyphicon glyphicon-remove"></i></a>
+        </label>
+      </div>
+    </div>
+
+    <hr>
+    <div class="shieldType">标题</div>
+    <div class="row">
+      <div class="col-md-2" name="titleItem-Model" style="display: none; font-size: 23px; height: 35px">
+        <label class="btn trashItem" data-value="" data-shield_type="titles">
+          <a name="delUserIcon" href="#" style="display: none;"><i class="DNWSYA-btn-icon glyphicon glyphicon-remove"></i></a>
+        </label>
+      </div>
+    </div>
+
   </div>
 </body>
 </html>
