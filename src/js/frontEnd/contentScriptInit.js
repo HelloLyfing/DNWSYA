@@ -73,11 +73,12 @@ var DomHelper = ( function(){
 
 var FilterContent = ( function(){
   
+  var WhyShieldType = ['USER', 'HOST', 'ADDRESSS', 'TITLE'];
+
   function addTrashBtn() {
     if ( $('#DNWSYA-trashBtn').length > 0 ) {
       return;
     }
-    console.log('add t btn');
 
     var iconClass = {
       see : 'glyphicon glyphicon-eye-open',
@@ -123,8 +124,9 @@ var FilterContent = ( function(){
   /**
    * 在垃圾区域追加一条垃圾tweet
    * @param  {[object]} item tweet实体
+   * @param  {[object]} whyShield {type, value}
    */
-  function appendTrashItem(item) {
+  function appendTrashItem(item, whyShield) {
     if ( $(DNWSYASlt.oneTrashRow).length === 0 ) {
       // 将单条垃圾tweet的模型作为一行(tr)添加到moreBtn所在行的后边
       var $rowClone = $('#DNWSYA-Container tr[name=DNWSYA-oneTrashTR-Model').clone();
@@ -147,8 +149,25 @@ var FilterContent = ( function(){
     $newTrashRow.attr({name: 'DNWSYA-oneTrashTR-Normal'});
     $newTrashRow.find('[name=index]').html(trashIndex);
     $newTrashRow.find('a[name=title]').attr('href', item.link).html(item.title).after('&nbsp;');
-    $newTrashRow.find('a[name=author]').attr('href', '/user?id=' + item.author).html('@'+item.author);
-
+    switch(whyShield.type){
+    case WhyShieldType[0]:
+      var $userLink = $newTrashRow.find('a[name=author]');
+      $userLink.attr('href', '/user?id=' + item.author);
+      $userLink.html('@用户: '+ whyShield.value);
+    break;
+    case WhyShieldType[1]:
+      var $strWhy = $newTrashRow.find('span[name=stringWhy]');
+      $strWhy.html('@网站: ' + whyShield.value);
+    break;
+    case WhyShieldType[2]:
+      var $strWhy = $newTrashRow.find('span[name=stringWhy]');
+      $strWhy.html('@网址: ' + whyShield.value);
+    break;
+    case WhyShieldType[3]:
+      var $strWhy = $newTrashRow.find('span[name=stringWhy]');
+      $strWhy.html('@标题: ' + whyShield.value);
+    break;
+    }
     $trashRowModel.before('<tr style="height: 6px; display: none;"></tr>');
     $trashRowModel.before($newTrashRow);
   }
@@ -158,7 +177,7 @@ var FilterContent = ( function(){
    * @param {jQueryObj} $TweetRow 垃圾tweet标题所在行
    * @return {[object]}
    */
-  function realignTrashItem($tweetRow) {
+  function realignTrashItem($tweetRow, whyShield) {
     var trashItem = getTrashItem($tweetRow);
     // 先隐藏，移除追加操作放在异步执行，这样界面便不会卡顿
     $tweetRow.prev().hide().next().hide().next().hide();
@@ -166,53 +185,107 @@ var FilterContent = ( function(){
       $tweetRow.prev().remove();
       $tweetRow.next().remove();
       $tweetRow.remove();
-      appendTrashItem(trashItem);
-    }, 100);
+      appendTrashItem(trashItem, whyShield);
+    }, 500);
   }
   
-  function filterByUser(userList) {
-    if ( !userList ) return 0;
+  var checkTrashByUser = ( function(){
 
-    var foundList = [].slice(0);
-    // 找到项
-    $(DNWSYASlt.userLink).each( function(idx) {
-      var userID = $(this).html().trim();
-      if ( userList.indexOf(userID) > -1) {
-        foundList.push(this);
+    var userList;
+    var tmpData = {};
+    var userLinkSlt = 'td.subtext > a[href^="user?id="]';
+
+
+    function init( _userList ) {
+      userList = _userList;
+    }
+
+    function find($tweetRow){
+      var userID = $tweetRow.find(userLinkSlt).html();
+      if (userList.indexOf(userID) > -1) {
+        tmpData.userID = userID;
+        tmpData.tweetRow = $tweetRow;
+        return true;
       }
-    });
+      return false;
+    }
 
-    foundList.forEach( function(item){
-      var $tweetRow = $(item).parents('tr:first').prev();
-      realignTrashItem($tweetRow);
-    });
-    // 返回改动个数
-    return foundList.length;
-  }
+    function getTrash() {
+      var trashItem = {};
+      trashItem.tweetRow = tmpData.tweetRow;
+      trashItem.whyShield = { name: '用户', type: WhyShieldType[0], value: tmpData.userID };
+      return trashItem;
+    }
 
-  function filterByWebsite(hostList) {
-    if ( !hostList ) return 0;
+    return {
+      init    : init,
+      find    : find,
+      getTrash: getTrash
+    }
+  })();
 
-    var foundList = [].slice(0);
-    // 找到项
-    $(DNWSYASlt.tweetLink).each( function(idx) {
-      if ( hostList.indexOf(this.host) > -1) {
-        foundList.push(this);
+  var checkTrashByHost = ( function(){
+
+    var hostList;
+    var tmpData = {};
+    var tweetLinkSlt = 'td.title > a[target="_blank"]';
+
+    function init( _hostList ) {
+      hostList = _hostList;
+    }
+
+    function find($tweetRow) {
+      var host = $tweetRow.find(tweetLinkSlt)[0].host;
+      if (hostList.indexOf(host) > -1) {
+        tmpData.host = host;
+        tmpData.tweetRow = $tweetRow;
+        return true;
       }
-    });
+      return false;
+    }
 
-    foundList.forEach( function(item){  
-      $tweetRow = $(item).parents('tr:first');
-      realignTrashItem($tweetRow);
-    });
-    // 返回改动个数
-    return foundList.length;
-  }
+    function getTrash() {
+      var trashItem = {};
+      trashItem.tweetRow = tmpData.tweetRow;
+      trashItem.whyShield = { name:'网站', type: WhyShieldType[1], value: tmpData.host };
+      return trashItem;
+    }
+    
+    return {
+      init    : init,
+      find    : find,
+      getTrash: getTrash
+    }
+  })();
 
   return function(list){
-    var count = 0;
-    count += filterByUser(list[ShieldList.elemList[0]]);
-    count += filterByWebsite(list[ShieldList.elemList[1]]);
-    if ( count > 0 ) addTrashBtn();
+    checkTrashByUser.init( list[ShieldList.elemList[0]] );
+    checkTrashByHost.init( list[ShieldList.elemList[1]] );
+
+    var foundList = [].slice(0);
+    // 首先获取所有条目（32条，标题所在栏TR）
+    var allItems = $(DNWSYASlt.tweetLink).map( function(idx){
+      return $(this).parents('tr:first');
+    });
+    // 查看每一条是否符合某项屏蔽条件，一旦符合则返回，不会对同一条目进行多个条件的判断
+    for(var x = 0, trashItem; x < allItems.length; x++) {
+      if ( checkTrashByUser.find(allItems[x]) ) {
+        trashItem = checkTrashByUser.getTrash();
+        foundList.push(trashItem);
+        continue;
+      }
+
+      if ( checkTrashByHost.find(allItems[x]) ) {
+        trashItem = checkTrashByHost.getTrash();
+        foundList.push(trashItem);
+        continue;
+      }
+    }
+    
+    foundList.forEach( function(trashItem){
+      realignTrashItem(trashItem.tweetRow, trashItem.whyShield);
+    });
+
+    if ( foundList.length > 0 ) addTrashBtn();
   }
 })();

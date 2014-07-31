@@ -4,7 +4,7 @@ var ExtEngName = 'DNWSYA';
 
 var ShieldList = {
   key     : 'ShieldList',
-  elemList: ['users', 'websites', 'domains', 'titles']
+  elemList: ['users', 'hosts', 'addresses', 'titles']
 };
 
 var DNWSYASlt = {
@@ -12,8 +12,8 @@ var DNWSYASlt = {
   optsPanel  : '#DNWSYA-OptsPanel',
   mainBtn    : '#DNWSYA-Btn',
   moreBtn    : 'body > center > table .title > a[href^="/x?fnid="]',
-  userLink   : 'body > center > table td.subtext > a[href^="user?id="]',
-  tweetLink  : 'body > center > table tr:not(.trashRow) > td.title > a',
+  userLink   : 'body > center > table table td.subtext > a[href^="user?id="]',
+  tweetLink  : 'body > center > table table tr:not(.trashRow) > td.title > a[target="_blank"]',
   oneTrashRow: 'body > center > table tr[name=DNWSYA-oneTrashTR-Model]'
 };
 
