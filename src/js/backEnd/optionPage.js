@@ -40,17 +40,24 @@ function rmItemFromList(type, value) {
 
 var showShieldItems = ( function(){
 
-  var labelList = ['label-default', 'label-primary', 'label-success', 'label-info', 'label-warning'];
+  var labelList = ['label-success', 'label-info'];
   
+  function getLabelClass(idx, column){
+    var labelIdx = parseInt(idx / column % 2);
+    return labelList[labelIdx];
+  }
+
   function users(userList){
     if ( !userList ) return;
 
     var $userModel = $('[name=userItem-Model]');
-    userList.forEach( function(item){
+    
+    var clOneRow = $userModel.attr('class').match(/col-md-(\d{1,2})/)[1];
+    clOneRow = 12 / parseInt(clOneRow);
+    userList.forEach( function(item, idx){
       var $newUserItem = $userModel.clone();
-      var rdIdx = parseInt( Math.random() * labelList.length );
       $newUserItem.attr({name: 'userItem-Normal'});
-      $newUserItem.find('.trashItem').addClass(labelList[rdIdx] + ' label');
+      $newUserItem.find('.trashItem').addClass(getLabelClass(idx, clOneRow) + ' label');
       $newUserItem.find('.trashItem > span').html(item);
       $newUserItem.find('.trashItem').data('value', item);
       $newUserItem.show();
@@ -62,13 +69,17 @@ var showShieldItems = ( function(){
     if ( !hostList ) return;
     
     var $hostModel = $('[name=hostItem-Model]');
-    hostList.forEach( function(item){
+    // 每行多少栏？
+    var clOneRow = $hostModel.attr('class').match(/col-md-(\d{1,2})/)[1];
+    clOneRow = 12 / parseInt(clOneRow);
+    
+    hostList.forEach( function(item, idx){
       var $newHostItem = $hostModel.clone();
       var rdIdx = parseInt( Math.random() * labelList.length );
       $newHostItem.attr({name: 'hostItem-Normal'});
-      $newHostItem.find('label').addClass(labelList[rdIdx] + ' label');
-      $newHostItem.find('label').prepend(item);
-      $newHostItem.find('label').data('value', item);
+      $newHostItem.find('.trashItem').addClass(getLabelClass(idx, clOneRow) + ' label');
+      $newHostItem.find('.trashItem > span').html(item);
+      $newHostItem.find('.trashItem').data('value', item);
       $newHostItem.show();
       $hostModel.before($newHostItem);
     });

@@ -37,12 +37,13 @@ body {
 }
 
 [class^=col-md] {
-    padding: 10px;
+    font-size: 21px;
+    padding: 2px;
     border:1px solid #ddd;
 }
 
 .DNWSYA-btn-icon {
     position: absolute;
-    color: black;
-    top: 1px;
+    color: #364049;
+    top: -5px;
 }
