@@ -1,44 +1,121 @@
 $( function(){
-  chrome.storage.sync.get( function(items){
-    var shieldList = items['ShieldList'] || {};
-    showShieldItems(shieldList);
+  ShieldItemManager.getList(null, function(p1, p2, shieldList){
+    ShowShieldItems.all(shieldList);
   });
-  
-  $('body').on('mouseenter', '.trashItem', function(){
-    $(this).find('a[name=delUserIcon]').show();
-  }).on('mouseleave', '.trashItem', function(){
-    $(this).find('a[name=delUserIcon]').hide();
-  });
-  
-  $('body').on('click', 'a[name=delUserIcon]', function(){
-    var $item = $(this).parents('.trashItem:first');
-    var value = $item.data('value');
-    var shieldType = $item.data('shield_type');
-    rmItemFromList(shieldType, value);
-    $(this).parents('[class^="col-"]:first').fadeOut(400, function(){
-      $(this).remove();
-    });
-    // 防止a标签锚点跳动
-    return false;
-  });
+
+  OptPageActions();
 });
 
-function rmItemFromList(type, value) {
-  chrome.storage.sync.get( function(items){
-    var shieldList = items[ShieldList.key] || {};
-    var typeList = shieldList[type];
-    var idx = typeList.indexOf(value);
-    
-    if ( idx === - 1 ) return;
-    
-    typeList.splice(idx, 1);
-    shieldList[type] = typeList;
-    var setObj = {}; setObj[ShieldList.key] = shieldList;
-    chrome.storage.sync.set(setObj);
-  });
-}
+var OptPageActions = ( function(){
 
-var showShieldItems = ( function(){
+  function commonActions(){
+    // 重置按钮
+    $('#resetBtn').on('click', function(){
+      ShieldItemManager.reset();
+      setTimeout( function(){ window.location.reload(); }, 300);
+      return false;
+    });
+    // 删除按钮 浮现、消失
+    $('body').on('mouseenter', '.trashItem', function(){
+      $(this).find('a[name=delUserIcon]').show();
+    }).on('mouseleave', '.trashItem', function(){
+      $(this).find('a[name=delUserIcon]').hide();
+    });
+    // 删除按钮按下动作
+    $('body').on('click', 'a[name=delUserIcon]', function(){
+      var $item = $(this).parents('.trashItem:first');
+      var type = $item.data('shield_type');
+      var value = $item.data('value');
+      ShieldItemManager.rmItem(type, value);
+      $(this).parents('[class^="col-"]:first').fadeOut(400, function(){
+        $(this).remove();
+      });
+      // 防止a标签锚点跳动
+      return false;
+    });
+  }
+
+  function addrActions(){
+    var $addrTitle = $('[name=addrHeadTitle]');
+    var $addrInp = $addrTitle.find('input');
+
+    $addrTitle.on('mouseenter', function(){
+      if ( $addrInp.is(':visible') ) return;
+      $(this).find('a').show();
+    }).on('mouseleave', function(){
+      $(this).find('a').hide();
+    });
+
+    $addrTitle.find('a').on('click',function(){
+      $(this).hide();
+      var tmpWd = $addrInp.width();
+      // 不知道为什么这个输入框在每次动画时都会损失4个长度，这里就暂且给它补充4个长度
+      $addrInp.width(1).show().animate({width: tmpWd + 4});
+      $addrInp.focus();
+      return false;
+    });
+
+    $addrInp.on('blur', function(){
+      var tmpWd = $(this).width();
+      $addrInp.animate({width: 0}, function(){
+        $(this).hide();
+        $(this).width(tmpWd);
+      });
+    }).on('keyup', function(e){
+      if ( e.keyCode !== 13 || !$(this).val() ) return;
+
+      var type = $(this).data('shield_type');
+      var value = $(this).val();
+      $(this).val('');
+      ShieldItemManager.addItem(type, value, function(resp){
+        if ( !resp.result ) {
+          alert('添加失败 [ ' + resp.msg + ' ]');
+          return;
+        }
+        ShieldItemManager.getList(type, function(p1, typeList, p3){
+          ShowShieldItems.addres(typeList);
+        });
+      });
+    });
+  }
+
+  function titleActions(){
+    var $titleDiv = $('[name=titleHeadTitle]');
+    var $titleInp = $titleDiv.find('input');
+
+    $titleDiv.on('mouseenter', function(){
+      if ( $titleInp.is(':visible') ) return;
+      $(this).find('a').show();
+    }).on('mouseleave', function(){
+      $(this).find('a').hide();
+    });
+
+    $titleDiv.find('a').on('click',function(){
+      $(this).hide();
+      var tmpWd = $titleInp.width();
+      // 不知道为什么这个输入框在每次动画时都会损失4个长度，这里就暂且给它补充4个长度
+      $titleInp.width(0).show().animate({width: tmpWd + 4});
+      $titleInp.focus();
+      return false;
+    });
+
+    $titleInp.on('blur', function(){
+      var tmpWd = $titleInp.width();
+      $titleInp.animate({width: 0}, function() {
+        $titleInp.hide();
+        $titleInp.width(tmpWd);
+      });
+    });
+  }
+
+  return function(){
+    commonActions();
+    addrActions();
+    titleActions();
+  }
+})();
+
+var ShowShieldItems = ( function(){
 
   var labelList = ['label-success', 'label-info'];
   
@@ -87,9 +164,34 @@ var showShieldItems = ( function(){
     });
   }
 
-  return function(list){
-    users( list[ShieldList.elemList[0]] );
-    hosts( list[ShieldList.elemList[1]] );
-  } 
-})();
+  function addres(addrList){
+    if ( !addrList ) return;
+    // 删除旧内容
+    $('[name=addrItem-Normal]').remove();
+    // 准备添加新内容
+    var $addrModel = $('[name=addrItem-Model]');
+    // 每行多少栏？
+    var clOneRow = $addrModel.attr('class').match(/col-md-(\d{1,2})/)[1];
+    clOneRow = 12 / parseInt(clOneRow);
+    var maxLen = 12;
+    addrList.forEach( function(item, idx){
+      var $newAddrItem = $addrModel.clone();
+      var strShow = item.length > maxLen ? item.substring(0, maxLen - 2) + '...' : item;
+      $newAddrItem.attr({name: 'addrItem-Normal', title: item});
+      $newAddrItem.find('.trashItem').data('value', item);
+      $newAddrItem.find('.trashItem').addClass(getLabelClass(idx, clOneRow) + ' label');
+      $newAddrItem.find('.trashItem > span').html(strShow);
+      $newAddrItem.show();
+      $addrModel.before($newAddrItem);
+    });
+  }
 
+  return {
+    all: function(list) {
+      users( list[ShieldList.elemList[0]] );
+      hosts( list[ShieldList.elemList[1]] );    
+      addres( list[ShieldList.elemList[2]] );
+    },
+    addres: addres
+  }
+})();

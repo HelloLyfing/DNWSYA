@@ -7,13 +7,19 @@
   <link rel="stylesheet" type="text/css" href="/css/backEnd/backEndGlobal.css">
   <script type="text/javascript" src="/js/3rdParty/jquery-min-v2.1.1.js"></script>
   <script type="text/javascript" src="/js/public/config.js"></script>
+  <script type="text/javascript" src="/js/backEnd/shieldManager.js"></script>
   <script type="text/javascript" src="/js/backEnd/optionPage.js"></script>
 </head>
 
 <body>
   <div class="container">
+    <!-- 重置按钮 -->
+    <div style="position: absolute; top: 5px; right: 10px;">
+      <a href="#" id="resetBtn">reset</a>
+    </div>
+    
     <hr>
-    <div class="shieldType">用户</div>
+    <div class="row shieldType"><span>用户</span></div>
     <div class="row">
       <div class="col-md-2" name="userItem-Model" style="display: none;">
         <button class="btn trashItem" data-value="" data-shield_type="users">
@@ -24,7 +30,7 @@
     </div>
 
     <hr>
-    <div class="shieldType">网站</div>
+    <div class="row shieldType"><span>网站</span></div>
     <div class="row">
       <div class="col-md-3" name="hostItem-Model" style="display: none;">
         <button class="btn trashItem" data-value="" data-shield_type="hosts">
@@ -35,20 +41,29 @@
     </div>
 
     <hr>
-    <div class="shieldType">网址</div>
+    <div class="row shieldType" name="addrHeadTitle">
+      <span>网址</span>
+      <a href="#" style="display: none; color:black;"><span class="glyphicon glyphicon-plus"></span></a>
+      <input style="display: none;" data-shield_type="addres" type="text" placeholder="示例: www.example.com/foo">
+    </div>
     <div class="row">
-      <div class="col-md-3" name="addrItem-Model" style="display: none; font-size: 23px; height: 35px">
-        <label class="btn trashItem" data-value="" data-shield_type="addres">
+      <div class="col-md-3" name="addrItem-Model" style="display: none;">
+        <button class="btn trashItem" data-value="" data-shield_type="addres">
+          <span></span>
           <a name="delUserIcon" href="#" style="display: none;"><i class="DNWSYA-btn-icon glyphicon glyphicon-remove"></i></a>
-        </label>
+        </button>
       </div>
     </div>
 
     <hr>
-    <div class="shieldType">标题</div>
+    <div class="row shieldType" name="titleHeadTitle">
+      <span>标题</span>
+      <a href="#" style="display: none; color:black;"><span class="glyphicon glyphicon-plus"></span></a>
+      <input style="display: none;" data-shield_type="titles" type="text" placeholder='示例: "8个惊艳的"、"/regex here/"'>
+    </div>
     <div class="row">
-      <div class="col-md-2" name="titleItem-Model" style="display: none; font-size: 23px; height: 35px">
-        <label class="btn trashItem" data-value="" data-shield_type="titles">
+      <div class="col-md-3" name="titleItem-Model" style="display: none; font-size: 23px; height: 35px">
+        <label class="btn trashItem" data-value="" data-shield_type="addres">
           <a name="delUserIcon" href="#" style="display: none;"><i class="DNWSYA-btn-icon glyphicon glyphicon-remove"></i></a>
         </label>
       </div>
