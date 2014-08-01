@@ -73,8 +73,8 @@ var DomHelper = ( function(){
 
 var FilterContent = ( function(){
   
-  var WhyShieldType = ['USER', 'HOST', 'ADDRESSS', 'TITLE'];
-
+  var WhyShieldType = ['USER', 'HOST', 'ADDRES', 'TITLE'];
+  
   function addTrashBtn() {
     if ( $('#DNWSYA-trashBtn').length > 0 ) {
       return;

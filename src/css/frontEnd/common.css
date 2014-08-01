@@ -17,6 +17,11 @@ html {
   box-sizing: content-box;
 }
 
+.onNormal {
+  padding: 6px 12px 20px;
+  margin-bottom: 5px;
+}
+
 .onDragOver {
   border: 2px dashed #000;
   background-color: #F55;

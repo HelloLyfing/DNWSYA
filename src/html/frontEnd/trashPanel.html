@@ -1,13 +1,13 @@
 <div id="DNWSYA-OptsPanel">
-  <div class="btn btn-default shieldArea" id="shieldAreaUser" style="width: 101px;">
+  <div class="btn btn-default onNormal shieldArea" id="shieldAreaUser">
     <span class="glyphicon glyphicon-trash"></span> 屏蔽用户
   </div>
 
-  <div type="button" class="btn btn-default shieldArea" id="shieldAreaWebsite" style="width: 101px; margin-top: 5px;">
-    <span class="glyphicon glyphicon-trash"></span> 屏蔽网址
+  <div class="btn btn-default onNormal shieldArea" id="shieldAreaWebsite">
+    <label class="glyphicon glyphicon-trash"></label> 屏蔽网站
   </div>
 
-  <div type="button" class="btn btn-default" id="shieldAreaMore" style="width: 101px; margin-top: 5px;">
+  <div type="button" class="btn btn-default" id="shieldAreaMore" style="width: 101px">
     <span class="glyphicon glyphicon-align-left"></span> More...
   </div>
 
@@ -23,6 +23,7 @@ var TrashPanel = ( function(){
       shieldAreaWebsite: '#shieldAreaWebsite'
     };
 
+    /* 回收站面板，绑定事件handler */
     function trashAreaHandler() {
       $('.shieldArea').on('dragover', function(e){
         e.preventDefault();
@@ -32,7 +33,7 @@ var TrashPanel = ( function(){
         clearTimeout( $this.data('timeoutID') );
         var tmpID = setTimeout( function(){
           $this.removeClass('onDragOver');
-        }, 260);
+        }, 200);
         $this.data('timeoutID', tmpID);
       });
 

@@ -9,7 +9,7 @@ $( function(){
   }).on('mouseleave', '.trashItem', function(){
     $(this).find('a[name=delUserIcon]').hide();
   });
-
+  
   $('body').on('click', 'a[name=delUserIcon]', function(){
     var $item = $(this).parents('.trashItem:first');
     var value = $item.data('value');
