@@ -54,12 +54,14 @@ var showShieldItems = ( function(){
     
     var clOneRow = $userModel.attr('class').match(/col-md-(\d{1,2})/)[1];
     clOneRow = 12 / parseInt(clOneRow);
+    var maxLen = 10;
     userList.forEach( function(item, idx){
       var $newUserItem = $userModel.clone();
-      $newUserItem.attr({name: 'userItem-Normal'});
-      $newUserItem.find('.trashItem').addClass(getLabelClass(idx, clOneRow) + ' label');
-      $newUserItem.find('.trashItem > span').html(item);
+      var strShow = item.length > maxLen ? item.substring(0, maxLen - 2) + '...' : item;
+      $newUserItem.attr({name: 'userItem-Normal', title: item});
       $newUserItem.find('.trashItem').data('value', item);
+      $newUserItem.find('.trashItem').addClass(getLabelClass(idx, clOneRow) + ' label');
+      $newUserItem.find('.trashItem > span').html(strShow);
       $newUserItem.show();
       $userModel.before($newUserItem);
     });
@@ -72,14 +74,14 @@ var showShieldItems = ( function(){
     // 每行多少栏？
     var clOneRow = $hostModel.attr('class').match(/col-md-(\d{1,2})/)[1];
     clOneRow = 12 / parseInt(clOneRow);
-    
+    var maxLen = 17;
     hostList.forEach( function(item, idx){
       var $newHostItem = $hostModel.clone();
-      var rdIdx = parseInt( Math.random() * labelList.length );
-      $newHostItem.attr({name: 'hostItem-Normal'});
-      $newHostItem.find('.trashItem').addClass(getLabelClass(idx, clOneRow) + ' label');
-      $newHostItem.find('.trashItem > span').html(item);
+      var strShow = item.length > maxLen ? item.substring(0, maxLen - 2) + '...' : item;
+      $newHostItem.attr({name: 'hostItem-Normal', title: item});
       $newHostItem.find('.trashItem').data('value', item);
+      $newHostItem.find('.trashItem').addClass(getLabelClass(idx, clOneRow) + ' label');
+      $newHostItem.find('.trashItem > span').html(strShow);
       $newHostItem.show();
       $hostModel.before($newHostItem);
     });
