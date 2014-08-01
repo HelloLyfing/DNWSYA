@@ -105,6 +105,21 @@ var OptPageActions = ( function(){
         $titleInp.hide();
         $titleInp.width(tmpWd);
       });
+    }).on('keyup', function(e){
+      if ( e.keyCode !== 13 || !$(this).val() ) return;
+
+      var type = $(this).data('shield_type');
+      var value = $(this).val();
+      $(this).val('');
+      ShieldItemManager.addItem(type, value, function(resp){
+        if ( !resp.result ) {
+          alert('添加失败 [ ' + resp.msg + ' ]');
+          return;
+        }
+        ShieldItemManager.getList(type, function(p1, typeList, p3){
+          ShowShieldItems.titles(typeList);
+        });
+      });
     });
   }
 
@@ -173,7 +188,7 @@ var ShowShieldItems = ( function(){
     // 每行多少栏？
     var clOneRow = $addrModel.attr('class').match(/col-md-(\d{1,2})/)[1];
     clOneRow = 12 / parseInt(clOneRow);
-    var maxLen = 12;
+    var maxLen = 25;
     addrList.forEach( function(item, idx){
       var $newAddrItem = $addrModel.clone();
       var strShow = item.length > maxLen ? item.substring(0, maxLen - 2) + '...' : item;
@@ -186,12 +201,36 @@ var ShowShieldItems = ( function(){
     });
   }
 
+  function titles(titleList){
+    if ( !titleList ) return;
+    // 删除旧内容
+    $('[name=titleItem-Normal]').remove();
+    // 准备添加新内容
+    var $titleModel = $('[name=titleItem-Model]');
+    // 每行多少栏？
+    var clOneRow = $titleModel.attr('class').match(/col-md-(\d{1,2})/)[1];
+    clOneRow = 12 / parseInt(clOneRow);
+    var maxLen = 18;
+    titleList.forEach( function(item, idx){
+      var $newTitleItem = $titleModel.clone();
+      var strShow = item.length > maxLen ? item.substring(0, maxLen - 2) + '...' : item;
+      $newTitleItem.attr({name: 'titleItem-Normal', title: item});
+      $newTitleItem.find('.trashItem').data('value', item);
+      $newTitleItem.find('.trashItem').addClass(getLabelClass(idx, clOneRow) + ' label');
+      $newTitleItem.find('.trashItem > span').html(strShow);
+      $newTitleItem.show();
+      $titleModel.before($newTitleItem);
+    });
+  }
+
   return {
     all: function(list) {
       users( list[ShieldList.elemList[0]] );
       hosts( list[ShieldList.elemList[1]] );    
       addres( list[ShieldList.elemList[2]] );
+      titles( list[ShieldList.elemList[3]] );
     },
-    addres: addres
+    addres: addres,
+    titles: titles
   }
 })();
