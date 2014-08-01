@@ -195,7 +195,7 @@ var ContentFilter = ( function(){
 
   var checkTrashByAddr = ( function(){
 
-    var addrList, addrListStr;
+    var addrList;
     var tmpData = {};
     var tweetLinkSlt = 'td.title > a[target="_blank"]';
 
@@ -229,14 +229,60 @@ var ContentFilter = ( function(){
     }
   })();
 
+  var checkTrashByTitle = ( function(){
+
+    var keywordList, regExpList;
+    var tmpData = {};
+    var tweetLinkSlt = 'td.title > a[target="_blank"]';
+
+    function init( _keywordList ) {
+      keywordList = _keywordList;
+      regExpList = [].slice(0);
+      // 将keyword转换成 正则表达式对象
+      for(var x = 0, keyword; x < keywordList.length; x++) {
+        keyword = keywordList[x];
+        // 如果是 "/\w{1,3}/" 形式的str，还需要把两边的斜杠去掉 
+        keyword = keyword.replace(/^\/(.+)\/$/, '$1');
+        regExpList.push( new RegExp(keyword) );
+      }
+    }
+
+    function find($tweetRow) {
+      var title = $tweetRow.find(tweetLinkSlt)[0].innerHTML;
+      for(var x = 0; x < regExpList.length; x++) {
+        if ( title.search(regExpList[x]) > -1 ) {
+          tmpData.keyword = keywordList[x];
+          tmpData.tweetRow = $tweetRow;
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function getTrash() {
+      var trashItem = {};
+      trashItem.tweetRow = tmpData.tweetRow;
+      trashItem.whyShield = { name:'关键字', type: WhyShieldType[3], value: tmpData.keyword };
+      return trashItem;
+    }
+    
+    return {
+      init    : init,
+      find    : find,
+      getTrash: getTrash
+    }
+  })();
+
   return function(list){
     var now = Date.now();
     var shieldUsers = list[ShieldList.elemList[0]] || [].slice(0);
     var shieldHosts = list[ShieldList.elemList[1]] || [].slice(0);
     var shieldAddres = list[ShieldList.elemList[2]] || [].slice(0);
+    var shieldKeywords = list[ShieldList.elemList[3]] || [].slice(0);
     checkTrashByUser.init( shieldUsers );
     checkTrashByHost.init( shieldHosts );
     checkTrashByAddr.init( shieldAddres );
+    checkTrashByTitle.init( shieldKeywords );
 
     var foundList = [].slice(0);
     // 首先获取所有条目（32条，标题所在栏TR）
@@ -259,6 +305,12 @@ var ContentFilter = ( function(){
 
       if ( checkTrashByAddr.find(allItems[x]) ) {
         trashItem = checkTrashByAddr.getTrash();
+        foundList.push(trashItem);
+        continue;
+      }
+
+      if ( checkTrashByTitle.find(allItems[x]) ) {
+        trashItem = checkTrashByTitle.getTrash();
         foundList.push(trashItem);
         continue;
       }
