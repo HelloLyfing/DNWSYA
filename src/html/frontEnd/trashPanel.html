@@ -1,14 +1,14 @@
 <div id="DNWSYA-OptsPanel">
   <div class="btn btn-default onNormal shieldArea" id="shieldAreaUser">
-    <span class="glyphicon glyphicon-trash"></span> 屏蔽用户
+    <i class="glyphicon glyphicon-trash"></i> 屏蔽用户
   </div>
 
   <div class="btn btn-default onNormal shieldArea" id="shieldAreaWebsite">
-    <label class="glyphicon glyphicon-trash"></label> 屏蔽网站
+    <i class="glyphicon glyphicon-trash"></i> 屏蔽网站
   </div>
 
   <div type="button" class="btn btn-default" id="shieldAreaMore" style="width: 101px">
-    <span class="glyphicon glyphicon-align-left"></span> More...
+    <i class="glyphicon glyphicon-align-left"></i> More...
   </div>
 
 </div>
@@ -29,13 +29,24 @@ var TrashPanel = ( function(){
         e.preventDefault();
         $(this).addClass('onDragOver');
       }).on('dragleave', function(e){
+        e.preventDefault();
         var $this = $(this);
+        // 由于鼠标进入icon区域(那个垃圾桶icon)时，尽管鼠标仍然在它的父容器.shieldArea上悬停，
+        // 但 dragleave 事件依然会被派发，所以此处需要判断一下鼠标是不是仍在.shieldArea上悬停
+        var mousePos = [e.originalEvent.y, e.originalEvent.x];
+        var tmp = $this[0].getBoundingClientRect();
+        var trashRect = [tmp.top, tmp.left, tmp.height, tmp.width];
+        if ( tmp.top < mousePos[0] && mousePos[0] < (tmp.top + tmp.height) )
+          if ( tmp.left < mousePos[1] && mousePos[1] < (tmp.left + tmp.width) )
+            return;
+
+        // 鼠标确实已经出了.shieldArea区域了
         clearTimeout( $this.data('timeoutID') );
         var tmpID = setTimeout( function(){
           $this.removeClass('onDragOver');
-        }, 200);
+        }, 125);
         $this.data('timeoutID', tmpID);
-      });
+      }).find('i').on('dragover', function(e){ e.preventDefault(); });
 
       $('#shieldAreaMore').on('click', function(){
         // 打开后台选项页
@@ -56,8 +67,8 @@ var TrashPanel = ( function(){
       $(slt.shieldAreaUser).on('drop', function(e){
         e.preventDefault();
         var userID = $(this).data('userID');
-        $(this).trigger('dragleave');
         sendNewItemToChrome(ShieldList.elemList[0], userID);
+        $(this).removeClass('onDragOver');
       });
     }
 
@@ -68,11 +79,11 @@ var TrashPanel = ( function(){
       $(slt.shieldAreaWebsite).on('drop', function(e){
         e.preventDefault();
         var host = $(this).data('host');
-        $(this).trigger('dragleave');
         sendNewItemToChrome(ShieldList.elemList[1], host);
+        $(this).removeClass('onDragOver');
       });
     }
-
+    
     return function(){
       trashAreaHandler();
       userLinkDnDHandler();
