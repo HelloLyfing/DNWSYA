@@ -29,6 +29,12 @@ var ShieldItemManager = ( function() {
     });
   }
 
+  /**
+   * 为某个type下的数组添加一个屏蔽内容
+   * @param {[string]} type  数组索引
+   * @param {[string]} value 屏蔽的值
+   * @param {Function} callback fn({result, msg, data['shieldList']})
+   */
   function addIntoList(type, value, callback) {
     getList(type, function(type, typeList, shieldList) {
       var resp = {};
@@ -43,15 +49,22 @@ var ShieldItemManager = ( function() {
       typeList.push(value);
       shieldList[type] = typeList;
 
-      var setObj = {}; 
+      var setObj = {};
       setObj[ShieldList.key] = shieldList;
       chrome.storage.sync.set(setObj, function(){
         resp.result = true;
+        resp.data = {shieldList: shieldList};
         callback(resp);
       });
     });
   }
 
+  /**
+   * 从某个type下的数组中移除一个屏蔽内容
+   * @param {[string]} type  数组索引
+   * @param {[string]} value 屏蔽的值
+   * @param {Function} callback fn({result, msg, data['shieldList']})
+   */
   function rmFromList(type, value, callback) {
     getList(type, function(type, typeList, shieldList) {
       var resp = {};
@@ -71,11 +84,12 @@ var ShieldItemManager = ( function() {
       setObj[ShieldList.key] = shieldList;
       chrome.storage.sync.set(setObj, function(){
         resp.result = true;
+        resp.data = {shieldList: shieldList};
         callback(resp);
       });
     });
   }
-
+  
   return {
     reset  : reset,
     getList: getList,

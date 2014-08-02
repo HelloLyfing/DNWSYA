@@ -18,24 +18,17 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
     chrome.tabs.create({url: evData.url, index: (activeTab.index + 1)});
   break;
   case 'DNWSYA:Request:GetNewShieldItem:TabPage':
-    chrome.storage.sync.get( function(items) {
-      var shieldList = items[ShieldList.key] || {};
-      
-      var typeList = shieldList[ evData.type ];
-      if ( !Array.isArray(typeList) ) typeList = [];
-      // 只有未添加过的才会被添加
-      if ( typeList.indexOf(evData.value) === -1 ) {
-        typeList.push(evData.value);
+    ShieldItemManager.getList(null, function(p1, p2, shieldList){
+    ShieldItemManager.addItem(evData.type, evData.value, function(resp){
+      var respData = {};
+      if ( !!resp.result ) { // 添加屏蔽内容成功
+        respData.result = true;
+        respData.evData = {shieldList: resp.data.shieldList};
+      } else {               // 添加内容失败
+        respData.result = false;
       }
-      shieldList[ evData.type ] = typeList;
-
-      var setObj = {}; setObj[ShieldList.key] = shieldList;
-      chrome.storage.sync.set(setObj);
-      var resp = {
-        result: true,
-        evData: {shieldList: shieldList}
-      };
-      sendResponse(resp);
+      sendResponse(respData);
+    });
     });
   break;
   } // end switch
