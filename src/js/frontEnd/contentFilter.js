@@ -1,6 +1,6 @@
 var ContentFilter = ( function(){
   
-  var WhyShieldType = ['USER', 'HOST', 'ADDRES', 'TITLE'];
+  var WhyShieldType = ['USER', 'HOST', 'ADDR', 'TITLE'];
 
   /**
    * 获取一条垃圾tweet的实体
@@ -81,7 +81,9 @@ var ContentFilter = ( function(){
   function realignTrashItem($tweetRow, whyShield) {
     var trashItem = getTrashItem($tweetRow);
     // 先隐藏，移除追加操作放在异步执行，以此来降低页面的卡顿感
-    $tweetRow.prev().hide().next().hide().next().hide();
+    $tweetRow.prev().hide();
+    $tweetRow.next().hide();
+    $tweetRow.hide();
     setTimeout( function(){
       $tweetRow.prev().remove();
       $tweetRow.next().remove();
